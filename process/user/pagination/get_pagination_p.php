@@ -126,7 +126,7 @@ if (isset($_GET['search_account'])) {
 	$stmt->execute();
 
 	if ($stmt->rowCount() > 0) {
-		foreach ($stmt->fetchALL() as $j) {
+		foreach ($stmt->fetchALL() as $row) {
 			// Table Header Sort Behavior
 			switch ($order_by_code) {
 				case 0:
@@ -149,11 +149,11 @@ if (isset($_GET['search_account'])) {
 			}
 			$data .= '<tr>';
 			$data .= '<td>' . $c . '</td>';
-			$data .= '<td>' . $j['id_number'] . '</td>';
-			$data .= '<td>' . $j['username'] . '</td>';
-			$data .= '<td>' . $j['full_name'] . '</td>';
-			$data .= '<td>' . $j['section'] . '</td>';
-			$data .= '<td>' . strtoupper($j['role']) . '</td>';
+			$data .= '<td>' . $row['id_number'] . '</td>';
+			$data .= '<td>' . $row['username'] . '</td>';
+			$data .= '<td>' . $row['full_name'] . '</td>';
+			$data .= '<td>' . $row['section'] . '</td>';
+			$data .= '<td>' . strtoupper($row['role']) . '</td>';
 			$data .= '</tr>';
 		}
 	} else {

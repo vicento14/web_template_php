@@ -35,11 +35,11 @@ if (isset($_POST['upload'])) {
                 } else {
                     // CHECK DATA
                     $sql = "SELECT id FROM user_accounts WHERE id_number = '$line[0]' AND full_name = '$line[1]' AND username = '$line[2]' AND password = '$line[3]' AND section = '$line[4]' AND role = '$line[5]'";
-                    $stmt = $conn->prepare($sql);
+                    $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
                     $stmt->execute();
                     if ($stmt->rowCount() > 0) {
-                        foreach ($stmt->fetchALL() as $x) {
-                            $id = $x['id'];
+                        foreach ($stmt->fetchALL() as $row) {
+                            $id = $row['id'];
                         }
 
                         $sql = "UPDATE user_accounts SET id_number = '$id_number', full_name = '$full_name' , username ='$username', password = '$password', section = '$section', role = '$role' WHERE id ='$id'";
@@ -50,7 +50,7 @@ if (isset($_POST['upload'])) {
                             $error++;
                         }
                     } else {
-                        $sql = "INSERT INTO user_accounts(`id_number`, `full_name`, `username`, `password`, `section`, `role`) VALUES ('$id_number','$full_name','$username','$password','$section','$role')";
+                        $sql = "INSERT INTO user_accounts(id_number, full_name, username, password, section, role) VALUES ('$id_number','$full_name','$username','$password','$section','$role')";
                         $stmt = $conn->prepare($sql);
                         if ($stmt->execute()) {
                             $error = 0;
