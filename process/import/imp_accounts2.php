@@ -34,8 +34,8 @@ if (isset($_POST['upload2'])) {
                     $stmt = $conn->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
                     $stmt->execute();
                     if ($stmt->rowCount() > 0) {
-                        foreach ($stmt->fetchALL() as $x) {
-                            $id = $x['id'];
+                        foreach ($stmt->fetchALL() as $row) {
+                            $id = $row['id'];
                         }
 
                         $sql = "UPDATE user_accounts SET id_number = '$id_number', full_name = '$full_name' , username ='$username', password = '$password', section = '$section', role = '$role' WHERE id ='$id'";

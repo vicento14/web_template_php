@@ -27,21 +27,21 @@ echo'
 </thead>
 <tbody>
 ';
-$query = "SELECT `id_number`, `full_name`, `username`, `password`, `section`, `role` FROM user_accounts WHERE id_number LIKE '$employee_no%' AND full_name LIKE '$full_name%'";
-$stmt = $conn->prepare($query);
+$query = "SELECT id_number, full_name, username, password, section, role FROM user_accounts WHERE id_number LIKE '$employee_no%' AND full_name LIKE '$full_name%'";
+$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt->execute();
 if ($stmt->rowCount() > 0) {
-	foreach ($stmt->fetchALL() as $j) {
+	foreach ($stmt->fetchALL() as $row) {
 		$c++;
 		echo '<tr>';
 			echo '<td>'.$c.'</td>';
-			echo '<td><b>'.$j['id_number'].'</b></td>';
-			echo '<td>'.$j['full_name'].'</td>';
-			echo '<td>'.$j['username'].'</td>';
-			echo '<td>'.$j['password'].'</td>';
-			echo '<td>'.$j['section'].'</td>';
-			echo '<td>'.$j['role'].'</td>';
-			echo '<td>Ako Po Si '.$j['full_name'].'</td>';
+			echo '<td><b>'.$row['id_number'].'</b></td>';
+			echo '<td>'.$row['full_name'].'</td>';
+			echo '<td>'.$row['username'].'</td>';
+			echo '<td>'.$row['password'].'</td>';
+			echo '<td>'.$row['section'].'</td>';
+			echo '<td>'.$row['role'].'</td>';
+			echo '<td>Ako Po Si '.$row['full_name'].'</td>';
 		echo '</tr>';
 	}
 }else{

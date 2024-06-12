@@ -35,8 +35,8 @@ fputs($f, "\xEF\xBB\xBF");
 $fields = array('#', 'ID Number', 'Full Name', 'Username', 'Password', 'Section', 'Role'); 
 fputcsv($f, $fields, $delimiter); 
 
-$sql = "SELECT `id_number`, `full_name`, `username`, `password`, `section`, `role` FROM user_accounts WHERE id_number LIKE '$employee_no%' AND full_name LIKE '$full_name%'";
-$stmt = $conn -> prepare($sql);
+$sql = "SELECT id_number, full_name, username, password, section, role FROM user_accounts WHERE id_number LIKE '$employee_no%' AND full_name LIKE '$full_name%'";
+$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 $stmt -> execute();
 if ($stmt -> rowCount() > 0) {
 	
