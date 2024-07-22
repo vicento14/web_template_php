@@ -16,7 +16,7 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" class="close" data-dismiss="modal">Close</button>
           <input type="submit" class="btn btn-primary" name="download_template" value="Download Template">
-          <input type="submit" class="btn btn-primary" name="upload" value="Upload CSV">
+          <input type="submit" class="btn btn-primary" name="upload3" value="Upload CSV">
         </div>
       </form>
     </div>

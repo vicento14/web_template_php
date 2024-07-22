@@ -8,7 +8,7 @@ if (!isset($_SESSION['username'])) {
   header('location: ../../page/user/pagination.php');
 }
 
-require('../conn.php');
+require '../DatabaseConnections.php';
 
 switch (true) {
     case !isset($_GET['employee_no']):
@@ -35,19 +35,43 @@ fputs($f, "\xEF\xBB\xBF");
 $fields = array('#', 'ID Number', 'Full Name', 'Username', 'Password', 'Section', 'Role'); 
 fputcsv($f, $fields, $delimiter); 
 
-$sql = "SELECT id_number, full_name, username, password, section, role FROM user_accounts WHERE id_number LIKE '$employee_no%' AND full_name LIKE '$full_name%'";
-$stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-$stmt -> execute();
-if ($stmt -> rowCount() > 0) {
-	
+// Connection Object
+$conn = null;
+
+// Connection Open
+$connectionArr = $db->connect();
+
+if ($connectionArr['connected'] == 1) {
+  $conn = $connectionArr['connection'];
+
+  $sql = "SELECT id_number, full_name, username, password, section, role 
+        FROM user_accounts 
+        WHERE id_number LIKE '$employee_no%' AND full_name LIKE '$full_name%'";
+  $stmt = $conn -> prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+  $stmt -> execute();
+
+  if ($stmt -> rowCount() > 0) {
     // Output each row of the data, format line as csv and write to file pointer 
     while($row = $stmt -> fetch(PDO::FETCH_ASSOC)) { 
-        $c++;
-        $lineData = array($c, $row['id_number'], $row['full_name'], $row['username'], $row['password'], $row['section'], $row['role']); 
-        fputcsv($f, $lineData, $delimiter); 
+      $c++;
+      $lineData = array(
+        $c, 
+        $row['id_number'], 
+        $row['full_name'], 
+        $row['username'], 
+        $row['password'], 
+        $row['section'], 
+        $row['role']
+      ); 
+      fputcsv($f, $lineData, $delimiter); 
     }
-    
+  }
+} else {
+  echo $connectionArr['title'] . " " . $connectionArr['message'];
 }
+
+// Connection Close
+$conn = null;
 
 // Move back to beginning of file 
 fseek($f, 0); 
