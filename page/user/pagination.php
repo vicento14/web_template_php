@@ -80,7 +80,7 @@
               </div>
                 <div class="row">
                   <div class="col-sm-12">
-                    <div class="dataTables_info" id="accounts_table_info" role="status" aria-live="polite"><?='Total: ' . $count?></div>
+                    <div class="dataTables_info" id="accounts_table_info" role="status" aria-live="polite"><?='Total: ' . $number_of_result?></div>
                     <input type="hidden" id="count_rows">
                   </div>
                 </div>
@@ -100,7 +100,7 @@
                 $prev_url = $_SERVER['REQUEST_URI'];
                 $next_url = $_SERVER['REQUEST_URI'];
 
-                if ($count > 0) {
+                if ($number_of_result > 0) {
                   if ($prev_page > 0) {
                     $prev_query_params['search_account'] = 1;
                     $prev_query_params['page'] = $prev_page;

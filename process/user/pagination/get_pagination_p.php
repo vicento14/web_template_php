@@ -1,15 +1,35 @@
 <?php
-function count_account_list($search_arr, $conn) {
-	$query = "SELECT count(id) AS total FROM user_accounts WHERE id_number LIKE '" . $search_arr['employee_no'] . "%' AND full_name LIKE '" . $search_arr['full_name'] . "%' AND role LIKE '" . $search_arr['user_type'] . "%'";
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach ($stmt->fetchALL() as $row) {
-			$total = $row['total'];
+function count_account_list($search_arr, $db) {
+	// Connection Object
+	$conn = null;
+
+	// Connection Open
+	$connectionArr = $db->connect();
+
+	if ($connectionArr['connected'] == 1) {
+		$conn = $connectionArr['connection'];
+
+		$query = "SELECT count(id) AS total FROM user_accounts 
+			WHERE id_number LIKE '" . $search_arr['employee_no'] . "%' 
+			AND full_name LIKE '" . $search_arr['full_name'] . "%' 
+			AND role LIKE '" . $search_arr['user_type'] . "%'";
+		$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+		$stmt->execute();
+		if ($stmt->rowCount() > 0) {
+			foreach ($stmt->fetchALL() as $row) {
+				$total = $row['total'];
+			}
+		} else {
+			$total = 0;
 		}
 	} else {
+		echo $connectionArr['title'] . " " . $connectionArr['message'];
 		$total = 0;
 	}
+	
+	// Connection Close
+	$conn = null;
+
 	return $total;
 }
 
@@ -47,7 +67,6 @@ if (isset($_GET['search_account'])) {
 	$c = 0;
 
 	$data = '';
-	$count = 0;
 	$pages = '';
 
 	$search_arr = array(
@@ -56,14 +75,17 @@ if (isset($_GET['search_account'])) {
 		"user_type" => $user_type
 	);
 
-	$number_of_result = intval(count_account_list($search_arr, $conn));
+	$number_of_result = intval(count_account_list($search_arr, $db));
 
 	$results_per_page = 10;
 
 	//determine the sql LIMIT starting number for the results on the displaying page
 	$page_first_result = ($current_page - 1) * $results_per_page;
 
-	$query = "SELECT * FROM user_accounts WHERE id_number LIKE '$employee_no%' AND full_name LIKE '$full_name%' AND role LIKE '$user_type%'";
+	$query = "SELECT * FROM user_accounts 
+			WHERE id_number LIKE '$employee_no%' 
+			AND full_name LIKE '$full_name%' 
+			AND role LIKE '$user_type%'";
 
 	// Table Header Sort Behavior
 	switch ($order_by_code) {
@@ -122,62 +144,66 @@ if (isset($_GET['search_account'])) {
 	$query = $query . " LIMIT " . $page_first_result . ", " . $results_per_page;
 	// MS SQL Server
 	// $query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
 
-	if ($stmt->rowCount() > 0) {
-		foreach ($stmt->fetchALL() as $row) {
-			// Table Header Sort Behavior
-			switch ($order_by_code) {
-				case 0:
-				case 2:
-				case 4:
-				case 6:
-				case 8:
-				case 10:
-					$c++;
-					break;
-				case 1:
-				case 3:
-				case 5:
-				case 7:
-				case 9:
-				case 11:
-					$c--;
-					break;
-				default:
+	// Connection Object
+	$conn = null;
+
+	// Connection Open
+	$connectionArr = $db->connect();
+
+	if ($connectionArr['connected'] == 1) {
+		$conn = $connectionArr['connection'];
+
+		$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+		$stmt->execute();
+
+		if ($stmt->rowCount() > 0) {
+			foreach ($stmt->fetchALL() as $row) {
+				// Table Header Sort Behavior
+				switch ($order_by_code) {
+					case 0:
+					case 2:
+					case 4:
+					case 6:
+					case 8:
+					case 10:
+						$c++;
+						break;
+					case 1:
+					case 3:
+					case 5:
+					case 7:
+					case 9:
+					case 11:
+						$c--;
+						break;
+					default:
+				}
+				$data .= '<tr>';
+				$data .= '<td>' . $c . '</td>';
+				$data .= '<td>' . $row['id_number'] . '</td>';
+				$data .= '<td>' . $row['username'] . '</td>';
+				$data .= '<td>' . $row['full_name'] . '</td>';
+				$data .= '<td>' . $row['section'] . '</td>';
+				$data .= '<td>' . strtoupper($row['role']) . '</td>';
+				$data .= '</tr>';
 			}
+		} else {
 			$data .= '<tr>';
-			$data .= '<td>' . $c . '</td>';
-			$data .= '<td>' . $row['id_number'] . '</td>';
-			$data .= '<td>' . $row['username'] . '</td>';
-			$data .= '<td>' . $row['full_name'] . '</td>';
-			$data .= '<td>' . $row['section'] . '</td>';
-			$data .= '<td>' . strtoupper($row['role']) . '</td>';
+			$data .= '<td colspan="6" style="text-align:center; color:red;">No Result !!!</td>';
 			$data .= '</tr>';
 		}
 	} else {
-		$data .= '<tr>';
-		$data .= '<td colspan="6" style="text-align:center; color:red;">No Result !!!</td>';
-		$data .= '</tr>';
+		echo $connectionArr['title'] . " " . $connectionArr['message'];
 	}
-
-	$search_arr = array(
-		"employee_no" => $employee_no,
-		"full_name" => $full_name,
-		"user_type" => $user_type
-	);
-
-	$count = count_account_list($search_arr, $conn);
-
-	$results_per_page = 10;
-
-	$number_of_result = intval($count);
+	
+	// Connection Close
+	$conn = null;
 
 	//determine the total number of pages available  
 	$number_of_page = ceil($number_of_result / $results_per_page);
 
-	if ($count > 0) {
+	if ($number_of_result > 0) {
 		$url_components = parse_url($_SERVER['REQUEST_URI']);
 		$next_query_params = [];
 
@@ -214,7 +240,6 @@ if (isset($_GET['search_account'])) {
 	$c = 0;
 
 	$data = '';
-	$count = 0;
 	$pages = '';
 
 	$results_per_page = 10;
@@ -230,25 +255,41 @@ if (isset($_GET['search_account'])) {
 	// MS SQL Server
 	// $query = $query . " ORDER BY id ASC";
 	// $query = $query . " OFFSET ".$page_first_result." ROWS FETCH NEXT ".$results_per_page." ROWS ONLY";
-	$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
-	$stmt->execute();
-	if ($stmt->rowCount() > 0) {
-		foreach ($stmt->fetchALL() as $row) {
-			$c++;
+
+	// Connection Object
+	$conn = null;
+
+	// Connection Open
+	$connectionArr = $db->connect();
+
+	if ($connectionArr['connected'] == 1) {
+		$conn = $connectionArr['connection'];
+
+		$stmt = $conn->prepare($query, array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+		$stmt->execute();
+		if ($stmt->rowCount() > 0) {
+			foreach ($stmt->fetchALL() as $row) {
+				$c++;
+				$data .= '<tr>';
+				$data .= '<td>' . $c . '</td>';
+				$data .= '<td>' . $row['id_number'] . '</td>';
+				$data .= '<td>' . $row['username'] . '</td>';
+				$data .= '<td>' . $row['full_name'] . '</td>';
+				$data .= '<td>' . $row['section'] . '</td>';
+				$data .= '<td>' . strtoupper($row['role']) . '</td>';
+				$data .= '</tr>';
+			}
+		} else {
 			$data .= '<tr>';
-			$data .= '<td>' . $c . '</td>';
-			$data .= '<td>' . $row['id_number'] . '</td>';
-			$data .= '<td>' . $row['username'] . '</td>';
-			$data .= '<td>' . $row['full_name'] . '</td>';
-			$data .= '<td>' . $row['section'] . '</td>';
-			$data .= '<td>' . strtoupper($row['role']) . '</td>';
+			$data .= '<td colspan="6" style="text-align:center; color:red;">No Result !!!</td>';
 			$data .= '</tr>';
 		}
 	} else {
-		$data .= '<tr>';
-		$data .= '<td colspan="6" style="text-align:center; color:red;">No Result !!!</td>';
-		$data .= '</tr>';
+		echo $connectionArr['title'] . " " . $connectionArr['message'];
 	}
+	
+	// Connection Close
+	$conn = null;
 
 	$search_arr = array(
 		"employee_no" => $employee_no,
@@ -256,16 +297,14 @@ if (isset($_GET['search_account'])) {
 		"user_type" => $user_type
 	);
 
-	$count = count_account_list($search_arr, $conn);
-
 	$results_per_page = 10;
 
-	$number_of_result = intval($count);
+	$number_of_result = intval(count_account_list($search_arr, $db));
 
 	//determine the total number of pages available  
 	$number_of_page = ceil($number_of_result / $results_per_page);
 
-	if ($count > 0) {
+	if ($number_of_result > 0) {
 		$url_components = parse_url($_SERVER['REQUEST_URI']);
 		$next_query_params = [];
 
