@@ -32,6 +32,8 @@ $conn = NULL;
 <script src="../../dist/js/adminlte.js"></script>
 <!-- Popup Center -->
 <script src="../../dist/js/popup_center.js"></script>
+<!-- Export CSV -->
+<script src="../../dist/js/export_csv.js"></script>
 
 <?php
 $url_components = parse_url($_SERVER['REQUEST_URI']);
